@@ -24,6 +24,7 @@ def read_rtc():
 def enable_write():
     bus.write_byte_data(RTC_ADDRESS, 0x10, 0x80)
     bus.write_byte_data(RTC_ADDRESS, 0x0F, 0x84)
+    
 # Désactivation de l'écriture sur l'horloge RTC
 def disable_write():
     bus.write_byte_data(RTC_ADDRESS, 0x0F, 0x00)
@@ -40,9 +41,7 @@ def display_time():
 def send_images():
     """Envoie chaque image .jpg dès qu'elle est détectée dans le dossier courant."""
     server_url = "http://192.168.137.2:5000/upload_image"
-
     image_files = [f for f in os.listdir() if f.endswith(".jpg")]
-
     for image in image_files:
         with open(image, 'rb') as img:
             files = {'file': (image, img, 'image/jpeg')}
@@ -60,18 +59,15 @@ def send_data():
     server_url = "http://192.168.137.2:5000/upload"
     days = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"]
     months = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "Nov>
-
     while True:
         temperature, humidity = temp_I2C.read_temp()  # Lecture des valeurs du capteur
         date = display_time()  # Récupération de la date actuelle
         timestamp = f"{date[2]}:{date[1]}:{date[0]} {days[date[3]-1]} {date[4]} {months[date[5]-1]} {date[6]}"
-
         data = {
             "temperature": round(temperature, 2),
             "humidity": round(humidity, 2),
             "timestamp": timestamp
-        }
-        
+        }    
         try:
             response = requests.post(server_url, json=data)
             if response.status_code == 200:
@@ -80,12 +76,10 @@ def send_data():
                 print(f"Erreur lors de l'envoi: {response.status_code}")
         except Exception as e:
             print(f"Erreur de connexion: {e}")
-
         # Sauvegarde des données localement
         with open("data.txt", "a") as f:
             f.write(timestamp + "\n")
             f.write(f"Temperature = {data['temperature']}°C   Humidity = {data['humidity']}%\n\n\n")
-
         send_images()  # Envoi des images après l'envoi des données
         time.sleep(5)  # Attente avant le prochain envoi
 
