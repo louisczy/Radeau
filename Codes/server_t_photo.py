@@ -49,15 +49,12 @@ def upload_image():
     """Réception des images envoyées par le client"""
     if 'file' not in request.files:
         return jsonify({"error": "Aucun fichier reçu"}), 400
-
     file = request.files['file']
     if file.filename == '':
         return jsonify({"error": "Nom de fichier invalide"}), 400
-
     filepath = os.path.join(UPLOAD_FOLDER, file.filename)
     file.save(filepath)
     print(f"Image reçue : {filepath}")
-
     return jsonify({"message": "Image reçue avec succès", "filename": file.filename}), 200
 
 if __name__ == "__main__":
